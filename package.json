@@ -1,0 +1,19 @@
+{
+  "name": "react-forms-system",
+  "version": "0.0.1",
+  "description": "A react library for building forms",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nwpray/react-forms-system.git"
+  },
+  "author": "Nick Pray",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nwpray/react-forms-system/issues"
+  },
+  "homepage": "https://github.com/nwpray/react-forms-system#readme"
+}
