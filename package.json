@@ -1,19 +1,40 @@
 {
-  "name": "react-forms-system",
-  "version": "0.0.1",
-  "description": "A react library for building forms",
-  "main": "index.js",
+  "name": "react-forms-sytem",
+  "version": "1.0.0",
+  "description": "A react forms library",
+  "main": "dist/index.js",
+  "dependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "clean-webpack-plugin": "^0.1.19",
+    "compression-webpack-plugin": "^1.1.11",
+    "html-webpack-plugin": "^3.2.0",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.12.1",
+    "webpack-cli": "^3.0.8",
+    "webpack-dev-server": "^3.1.4"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:dev": "webpack --progress",
+    "build:dev:watch": "npm run build:dev -- --watch",
+    "start:dev": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nwpray/react-forms-system.git"
+    "url": "git+https://github.com/nwpray/react-bowtie.git"
   },
   "author": "Nick Pray",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nwpray/react-forms-system/issues"
+    "url": "https://github.com/nwpray/react-bowtie/issues"
   },
-  "homepage": "https://github.com/nwpray/react-forms-system#readme"
+  "homepage": "https://github.com/nwpray/react-bowtie#readme"
 }
