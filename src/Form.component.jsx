@@ -31,7 +31,7 @@ export default class Form extends React.Component{
 		super(props);
 		const controls = this.getControlList(props.children);
 		const validationState = Object.keys(controls).reduce((validation, controlName) => {
-			return { ...validation, [controlName]: { dirty: false, touched: false }};
+			return { ...validation, [controlName]: { dirty: false, touched: false, pending: [] }};
 		}, {});
 
 		this.state = { values: controls, validationState: validationState};
@@ -136,7 +136,9 @@ export default class Form extends React.Component{
                                     dirty: true
                                 }
                             }
-                        }, () => this.runValidation(props.name));
+                        }, () => {
+							this.runValidation(props.name)
+						});
                     }
                 };
 
@@ -176,8 +178,10 @@ export default class Form extends React.Component{
 
         // Aggregate the list of validators for controls that need to run validation
 		const validatorsByControl = [ fieldName, ...Object.keys(this.peerDependencies[fieldName] || {})].reduce(( list, controlName ) => {
-			return { ...list, [controlName]: this.validators[controlName] };
+			return { ...list, [controlName]: (this.validators[controlName] || {}) };
 		}, {});
+
+		const pendingTimeStamp = + new Date();
 
 		// Set all control validation states to pending
 		this.setState({
@@ -188,7 +192,7 @@ export default class Form extends React.Component{
 						...pendingControls,
 						[controlName]: {
 							...this.state.validationState[controlName],
-							pending: true
+							pending: [ ...(this.state.validationState[controlName].pending || []), pendingTimeStamp]
 						}
 					};
 				}, {})
@@ -229,12 +233,11 @@ export default class Form extends React.Component{
 				// Sets all control pending states to false and determines if form is valid overall
 				validationUpdates = Object.keys(validationUpdates).reduce((controlValidators, controlName) => {
 					const isValidCheck = this.isValidChecks[controlName] || defaultIsValidationCheck;
-
 					return {
 						...controlValidators,
 						[controlName]: {
                             ...validationUpdates[controlName],
-                            pending: false,
+                            pending: ( this.state.validationState[controlName].pending || []).filter((timeStamp) => timeStamp !== pendingTimeStamp),
                             valid: isValidCheck(validationUpdates[controlName])
 						}
 					};

@@ -324,7 +324,7 @@ Each control is passed as a property a set of validation states `validationState
 
 **Touched** - The control has fired the `onTouched` event
 
-**Pending** - One or more of the validators is still running
+**Pending** - One or more of the validators is still running. Pending is actually an array of timestamps signifying the start of a validation sequence. If the array is empty the validation is not pending otherwise at least one validation sequence is pending completion.
 
 **Valid** - All the validators return true or `isValidCheck` callback returns true
 
