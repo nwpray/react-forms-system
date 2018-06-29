@@ -4,8 +4,7 @@
   "description": "A react forms library",
   "main": "dist/index.js",
   "dependencies": {
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1"
+    "react": "^16.4.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -23,18 +22,18 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:dev": "webpack --progress",
-    "build:dev:watch": "npm run build:dev -- --watch",
-    "start:dev": "webpack-dev-server"
+    "build": "webpack --progress",
+    "build:watch": "npm run build:dev -- --watch",
+    "start": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nwpray/react-bowtie.git"
+    "url": "git+https://github.com/nwpray/react-forms-system.git"
   },
   "author": "Nick Pray",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nwpray/react-bowtie/issues"
+    "url": "https://github.com/nwpray/react-forms-system/issues"
   },
-  "homepage": "https://github.com/nwpray/react-bowtie#readme"
+  "homepage": "https://github.com/nwpray/react-forms-system#readme"
 }

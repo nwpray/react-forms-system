@@ -1,9 +1,7 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CompressionWbpackPlugin = require('compression-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
 
 module.exports = {
 	target: 'web',
@@ -14,7 +12,7 @@ module.exports = {
 	output: {
 		filename: "[name].js",
 		path: path.resolve('dist'),
-		library: 'react-bowtie',
+		library: 'react-forms-system',
 		libraryTarget: "umd",
 		umdNamedDefine: true
 	},
@@ -30,9 +28,6 @@ module.exports = {
 		]
 	},
     plugins:[
-		new HtmlWebpackPlugin({
-			template: path.resolve('src/index.html')
-		}),
         new CleanWebpackPlugin(['dist'], {
             root: path.resolve('./')
         }),
