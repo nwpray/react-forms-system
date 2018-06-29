@@ -128,7 +128,8 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 | defaultValue     | any                        | The initial value of the control when using an unmanaged form |
 | validators       | {}                         | A map of validators to be apply to this control on value change |
 | peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
-| isValidCheck`    | (validationState)=>boolean | A predicate function that will be used to determine the overall `valid` key of the controls validationState. |
+| isValidCheck |(validationState)=>boolean|A predicate function that will be used to determine the overall `valid` key of the controls validationState.|
+| ... |...|All other props will be applied to the component passed in `component` prop.|
 
 
 
