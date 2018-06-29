@@ -4,27 +4,60 @@ An npm package for building and managing form state with react.
 
 ### Contents
 
+- [Features](#features)
+
 - [Getting Started](#getting-started)
+
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+
+- [Components](#components)
+
+  - [Form](#form)
+    - [Basic Form](#basic-form)
+    - [Form State](#form-state)
+  - [Control](#control)
+    - [Basic Control](#basic-control)
+    - [Wrapper Interface](#wrapper-interface)
+    - [Validator](#validator)
+    - [Peer Dependencies](#peer-dependencies)
+
 - [Examples](#Examples)
   - [Managed Form](#managed-form)
   - [Unmanaged Form](#unmanaged-form)
   - [Control Wrapper](#control-wrapper)
   - [Basic Validation](#basic-validation)
   - [Cross Control Validation](#cross-control-validation)
-- [Features](#features)
+
 - [Related Projects](#related-projects)
+
+  
+
+## Features
+
+- Minimal library components
+
+- Control level and form level validation
+
+- Managed or unmanaged state
+
+- Dirty, touched and pending states
+
+- Customizable controls
+
+- Built in peer control evaluation
+
+  
 
 ## Getting Started
 
 
 
-### Prerequisits
+### Prerequisites
 
 React
 
-```
+```bash
 $ npm i react
 ```
 
@@ -32,19 +65,161 @@ $ npm i react
 
 ### Installation
 
-```
+```bash
 $ npm i react-forms-system
 ```
 
-### 
+
 
 ## Components
 
 ### Form
 
+`<Form />` is a HOC that manages and maintains the state of all the `<control />` that are nested below it.
+
+
+
+##### Props
+
+| Prop          | Type              | Description                                                  |
+| ------------- | ----------------- | ------------------------------------------------------------ |
+| onSubmit      | (FormState)=>void | onSubmit is called any time the html submit event is called. It passes the entire state of the form as its only argument. |
+| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument. |
+| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component. |
+
+
+
+##### Basic Form
+
+```jsx
+<Form onSubmit={(formState) => console.log(formState)}>
+    // ... form content here
+</Form>
+```
+
+
+
+##### Form State
+
+The form state can very based off your Controls, but the root of the form state always stays the same:
+
+```javascript
+{
+    values: { ... }, // A map of the Forms Control values
+    validationState: { ... } // A map of Forms Control validation states
+}
+```
+
 
 
 ### Control
+
+A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to any controls you would like to use in your form.
+
+
+
+##### Props
+
+| Prop             | Type                       | Description                                                  |
+| ---------------- | -------------------------- | ------------------------------------------------------------ |
+| name             | string                     | The name to call the component                               |
+| component        | React.Component            | The component to use as a control                            |
+| value            | any                        | The current value of the control when using in a managed form |
+| defaultValue     | any                        | The initial value of the control when using an unmanaged form |
+| validators       | {}                         | A map of validators to be apply to this control on value change |
+| peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
+| isValidCheck`    | (validationState)=>boolean | A predicate function that will be used to determine the overall `valid` key of the controls validationState. |
+
+
+
+##### Basic Control
+
+```jsx
+// Common use for a unmanaged form
+<Form.Control 
+    name="myControlName" 
+    component={MyControlComponent} 
+    defaultValue={''}
+/>
+
+// Common use for a managed form
+<Form.Control
+    name="myControlName"
+    component={MyControlComponent}
+    value={''}
+/>
+```
+
+
+
+##### Wrapper Interface
+
+```jsx
+const MyControlComponent = ({ value, onValueChange, onTouched, validationState }) = {
+    return (
+ 		// ...wrapped component to be used as a control goes here
+    );
+};
+```
+
+
+
+##### Validator
+
+A validator is a function that takes a control value and a map of peer values and returns ` true` for passed validation and ` false` for failed validation.  A validator can also return a Promise as every single validator gets wrapped in a `Promise.all()` during evaluation.
+
+```jsx
+(value, peerValues) => !!value || !!peerValues.peer
+```
+
+The format for passing validators to the control is:
+
+```jsx
+<Form.Control 
+    ...
+    validators={{ myValidator: (value, peerValues) => ... }}
+    ...
+/>
+```
+
+or for making validators reusable
+
+```jsx
+const myValidator = (value, peerValues) => ...;
+...
+<Form.Control 
+    ...
+    validators={{ myValidator }}
+    ...
+/>
+```
+
+Out of the box, the key `valid` will be set in the `validationState` of each control as `true` if all validators were `true` or `false` if any validator returned `false`. You can override this by passing the `isValidCheck` prop. `isValidCheck` receives the controls `validationState` and returns a `true` if field should be considered valid and `false` if it shouldn't. Here is a simple example:
+
+```jsx
+const required = (value) => !!value;
+...
+<Form.Control 
+    ...
+    validators={{ required }}
+    isValidCheck={(validationState) => validationState.required }
+    ...
+/>
+```
+
+
+
+##### Peer Dependencies
+
+Peer dependencies are any other `<Control />` component that the current control will need values for to run its own validation. The format for passing peer dependencies is:
+
+```jsx
+<Form.Control 
+    ...
+    peerDependencies={{ myValidator: (value, peerValues) => ... }}
+    ...
+/>
+```
 
 
 
@@ -244,15 +419,6 @@ const UnmanagedForm = () => {
 ```
 
 
-
-## Features
-
-- Minimal library components
-- Control level and form level validation
-- Managed or unmanaged state
-- Dirty, touched and pending states
-- Customizable controls
-- Built in peer control evaluation
 
 ## Related Projects
 
