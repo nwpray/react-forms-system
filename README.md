@@ -2,6 +2,10 @@
 
 An npm package for building and managing form state with react.
 
+### Disclaimer !!!
+
+This package is still in beta, there are know issues or features that still need to be implemented. You may notice performance issues during async validation.
+
 ### Contents
 
 - [Features](#features)
