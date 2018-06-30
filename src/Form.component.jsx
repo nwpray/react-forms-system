@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Control from './Control.component';
+import ObjectHelpers from './ObjectHelpers';
 
 const or = (chain, defaultValue = undefined) =>
     Object.values(chain).reduce(
@@ -17,8 +18,7 @@ const defaultIsValidationCheck = validationState =>
 
 const TYPE_CONTROL = 'Control';
 const BINDABLE_CONTROLS = [TYPE_CONTROL];
-
-const propsToRemove = ['onStateChange'];
+const PROPS_TO_REMOVE = ['onStateChange'];
 
 class Form extends React.Component {
     constructor(props) {
@@ -357,13 +357,7 @@ class Form extends React.Component {
         const { props } = this;
         const { children } = props;
 
-        const filteredProps = Object.keys(props).reduce(
-            (currentFilteredProps, current) =>
-                propsToRemove.indexOf(current) > -1
-                    ? currentFilteredProps
-                    : { ...props, [current]: props[current] },
-            {}
-        );
+        const filteredProps = ObjectHelpers.removeKeys(props, PROPS_TO_REMOVE);
 
         filteredProps.method = filteredProps.method || 'post';
         filteredProps.onSubmit = filteredProps.onSubmit || (e => e.preventDefault());

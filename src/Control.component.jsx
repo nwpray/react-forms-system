@@ -1,19 +1,13 @@
 import React from 'react';
+import ObjectHelpers from './ObjectHelpers';
 
-const propsToRemove = ['component', 'validators', 'peerDependencies', 'isValidCheck'];
+const PROPS_TO_REMOVE = ['component', 'validators', 'peerDependencies', 'isValidCheck'];
 
 const Control = props => {
     const { component } = props;
 
-    const filteredProps = Object.keys(props).reduce(
-        (currentlyFilteredProps, current) =>
-            propsToRemove.indexOf(current) > -1
-                ? currentlyFilteredProps
-                : { ...currentlyFilteredProps, [current]: currentlyFilteredProps[current] },
-        {}
-    );
-
     const Component = component;
+    const filteredProps = ObjectHelpers.removeKeys(props, PROPS_TO_REMOVE);
 
     return <Component {...filteredProps} />;
 };
