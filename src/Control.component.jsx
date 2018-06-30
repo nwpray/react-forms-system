@@ -1,15 +1,19 @@
 import React from 'react';
 
-const propsToRemove = ['component'];
+const propsToRemove = ['component', 'validators', 'peerDependencies', 'isValidCheck'];
 
-export default class Control extends React.Component{
-	render(){
-		const props = Object.keys(this.props).reduce((props, current) =>
-			propsToRemove.indexOf(current) > -1 ? props : { ...props, [current]: this.props[current] },
-			{}
-		);
-		const Component = this.props.component;
+const Control = (props) => {
 
-		return <Component {...props} />;
-	}
+ 	filteredProps = Object.keys(props).reduce((props, current) =>
+		propsToRemove.indexOf(current) > -1 ? props : { ...props, [current]: props[current] },
+		{}
+	);
+
+	const Component = props.component;
+
+	return (
+		<Component {...filteredProps} />
+	);
 }
+
+export default Control;
