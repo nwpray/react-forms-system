@@ -1,0 +1,10 @@
+{
+    "extends": [
+        "airbnb",
+        "prettier"
+    ],
+    "rules": {
+        "react/prop-types": [false],
+        "react/jsx-indent": [ "error", 4 ]
+    }
+}

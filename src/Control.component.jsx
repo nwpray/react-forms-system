@@ -2,18 +2,20 @@ import React from 'react';
 
 const propsToRemove = ['component', 'validators', 'peerDependencies', 'isValidCheck'];
 
-const Control = (props) => {
+const Control = props => {
+    const { component } = props;
 
- 	filteredProps = Object.keys(props).reduce((props, current) =>
-		propsToRemove.indexOf(current) > -1 ? props : { ...props, [current]: props[current] },
-		{}
-	);
+    const filteredProps = Object.keys(props).reduce(
+        (currentlyFilteredProps, current) =>
+            propsToRemove.indexOf(current) > -1
+                ? currentlyFilteredProps
+                : { ...currentlyFilteredProps, [current]: currentlyFilteredProps[current] },
+        {}
+    );
 
-	const Component = props.component;
+    const Component = component;
 
-	return (
-		<Component {...filteredProps} />
-	);
-}
+    return <Component {...filteredProps} />;
+};
 
 export default Control;
