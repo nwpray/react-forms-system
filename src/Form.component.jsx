@@ -200,6 +200,37 @@ class Form extends React.Component {
         );
     }
 
+    static getDerivedStateFromProps(props, state){
+        // Collect all controls with the form that are bindable
+        const bindableControls = bindableControlsFromChildren(props.children, BINDABLE_CONTROLS);
+
+        // Get all the form bindings needed for initializing the form;
+        const bindings = collectFormBindingsFromControls(bindableControls, {
+            values: bindControlValue
+        });
+
+        const updatedState = Object.keys(bindings.values).reduce((updates, controlName) => {
+            const { props: controlProps } = bindableControls.find((control) => control.props.name === controlName);
+            return controlProps.value && controlProps.value !== state.values[controlName] 
+                ? { 
+                    values: {
+                        ...updates.values,
+                        [controlName]: controlProps.value
+                    },
+                    validationState:{
+                        ...updates.validationState,
+                        [controlName]: {
+                            ...updates.validationState[controlName],
+                            dirty: true
+                        }
+                    }
+                }
+                : updates;
+        }, state);
+        
+        return JSON.stringify(updatedState) !== JSON.stringify(state) ? updatedState : null;
+    }
+
     getState() {
         const { state } = this.props;
         return state || this.state;
@@ -227,9 +258,10 @@ class Form extends React.Component {
                 // Bind change handler
                 const onValueChange = value => {
                     const stateDuringChange = this.getState();
+                    const { onStateChange } = this.props;
+
                     if (stateDuringChange[props.name] !== value) {
-                        // Set the form state then run validation
-                        this.setState({
+                        const stateChanges = {
                             values: {
                                 ...stateDuringChange.values,
                                 [props.name]: value
@@ -241,7 +273,10 @@ class Form extends React.Component {
                                     dirty: true
                                 }
                             }
-                        });
+                        };
+
+                        if(onStateChange) onStateChange(stateChanges)
+                        this.setState(stateChanges);
                     }
                 };
 
@@ -280,6 +315,7 @@ class Form extends React.Component {
                         props.defaultValue
                     ].find(value => typeof value !== 'undefined' && value !== null)
                 };
+                
             }
 
             // Clone the element with the updated props
