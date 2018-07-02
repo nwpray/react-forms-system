@@ -2,19 +2,108 @@ import React from 'react';
 
 import Control from './Control.component';
 import ObjectHelpers from './ObjectHelpers';
-
-const or = (chain, defaultValue = undefined) =>
-    Object.values(chain).reduce(
-        (selected, current) =>
-            !selected && typeof current !== 'undefined' && current !== null ? current : selected,
-        undefined
-    ) || defaultValue;
+import ConditionalHelpers from './ConditionalHelpers';
+import ReactHelpers from './ReactHelpers';
 
 const defaultIsValidationCheck = validationState =>
     Object.keys(validationState).reduce(
         (valid, validatorName) => (!validationState[validatorName] ? false : valid),
         true
     );
+
+// Flatten the children tree and filter out all the children that are not a component or not bindable
+/**
+ * TODO: Document bindableControlsFromChildren
+ *
+ * @param {*} children
+ * @param {*} bindableControlNames
+ */
+const bindableControlsFromChildren = (children, bindableControlNames) =>
+    ReactHelpers.flattenDescendants(children).filter(
+        child =>
+            ({ ...{}, ...child.props }.name &&
+            child.type &&
+            bindableControlNames.indexOf(child.type.name) > -1)
+    );
+
+const bindControlValue = (currentValues = {}, control) => {
+    const { name, value, defaultValue } = control.props;
+    return {
+        ...currentValues,
+        [name]: [value, defaultValue].find(x => typeof x !== 'undefined' && x !== null)
+    };
+};
+
+const bindControlValidationState = (currentState = {}, control) => {
+    const { name, validators } = control.props;
+    return {
+        ...currentState,
+        [name]: {
+            ...ObjectHelpers.applyValue(validators || {}, false),
+            dirty: false,
+            touched: false,
+            pending: []
+        }
+    };
+};
+
+const bindControlValidators = (currentValidators = {}, control) => {
+    const { name, validators } = control.props;
+
+    return {
+        ...currentValidators,
+        ...(validators ? { [name]: validators } : {})
+    };
+};
+
+const bindPeerDependencies = (currentDependencies = {}, control) => {
+    const { name, peerDependencies } = control.props;
+
+    return {
+        ...currentDependencies,
+        ...(peerDependencies ? { [name]: peerDependencies } : {})
+    };
+};
+
+const bindIsValidCheck = (currentChecks = {}, control) => {
+    const { name, isValidCheck } = control.props;
+    return {
+        ...currentChecks,
+        ...(isValidCheck ? { [name]: isValidCheck } : {})
+    };
+};
+
+const collectFormBindingsFromControls = (controls, bindings) =>
+    controls.reduce(
+        (formBindings, control) =>
+            Object.keys(bindings).reduce(
+                (controlBindings, bindingName) => ({
+                    ...controlBindings,
+                    [bindingName]: bindings[bindingName](formBindings[bindingName], control)
+                }),
+                {}
+            ),
+        {}
+    );
+
+const getDependentControls = (controlName, peerDependencies) =>
+    Object.keys(peerDependencies).filter(
+        dependantControlName =>
+            Object.keys(peerDependencies[dependantControlName]).indexOf(controlName) > -1
+    );
+
+const updateValidationState = (controlName, validationState, updates) => ({
+    ...validationState,
+    [controlName]: {
+        ...(validationState[controlName] || {}),
+        ...updates
+    }
+});
+
+const pushControlPending = (controlName, validationState, pendingKey) =>
+    updateValidationState(controlName, validationState, {
+        pending: [...validationState[controlName].pending, pendingKey]
+    });
 
 const TYPE_CONTROL = 'Control';
 const BINDABLE_CONTROLS = [TYPE_CONTROL];
@@ -24,32 +113,55 @@ class Form extends React.Component {
     constructor(props) {
         super(props);
 
-        this.validators = {};
-        this.peerDependencies = {};
-        this.isValidChecks = {};
+        // Collect all controls with the form that are bindable
+        const bindableControls = bindableControlsFromChildren(props.children, BINDABLE_CONTROLS);
 
-        const controls = this.getControlList(props.children);
-        const validationState = Object.keys(controls).reduce(
-            (validation, controlName) => ({
-                ...validation,
-                [controlName]: { dirty: false, touched: false, pending: [] }
-            }),
-            {}
-        );
+        // Get all the form bindings needed for initializing the form;
+        const bindings = collectFormBindingsFromControls(bindableControls, {
+            values: bindControlValue,
+            validationState: bindControlValidationState,
+            validators: bindControlValidators,
+            peerDependencies: bindPeerDependencies,
+            isValidChecks: bindIsValidCheck
+        });
 
-        this.state = { currentStateValues: controls, validationState };
+        // Init the form state
+        this.state = { values: bindings.values, validationState: bindings.validationState };
+
+        // Bind validation data
+        this.validators = bindings.validators;
+        this.peerDependencies = bindings.peerDependencies;
+        this.isValidChecks = bindings.isValidChecks;
     }
 
     componentDidUpdate(props, state) {
-        const { onStateChange, state: propsState } = this.props;
-        const { values: currentStateValues } = this.state;
+        const { state: currentPropState, onStateChange } = this.props;
+        const { state: currentState } = this;
+        const previousState = state;
 
+        // If the currentState is not the same as the last one fire the onStateChange handler if it exists
         if (
             onStateChange &&
-            ((propsState && propsState !== this.getState()) || state !== this.state)
-        ) {
-            onStateChange(this.getState());
-        }
+            !currentPropState &&
+            JSON.stringify(currentState) !== JSON.stringify(previousState)
+        )
+            onStateChange(currentState);
+
+        // Update validation bindings
+        const bindableControls = bindableControlsFromChildren(props.children, BINDABLE_CONTROLS);
+
+        const bindings = collectFormBindingsFromControls(bindableControls, {
+            validators: bindControlValidators,
+            peerDependencies: bindPeerDependencies,
+            isValidChecks: bindIsValidCheck
+        });
+
+        this.validators = bindings.validators;
+        this.peerDependencies = bindings.peerDependencies;
+        this.isValidChecks = bindings.isValidChecks;
+
+        // Determine which controls values have changed
+        const { values: currentStateValues } = this.getState();
 
         const modifiedControlValues = Object.keys(currentStateValues).reduce(
             (modifiedControls, controlName) =>
@@ -59,14 +171,14 @@ class Form extends React.Component {
             []
         );
 
-        // TODO : Make sure controls don't ever validate twice
+        // Run validation on modified controls
         modifiedControlValues.forEach(controlName => this.runValidation(controlName));
     }
 
     onSubmit(e) {
         e.preventDefault();
 
-        const { validationState: currentValidationState } = this.state;
+        const { validationState: currentValidationState } = this.getState();
         const { onSubmit } = this.props;
 
         this.setState(
@@ -85,55 +197,13 @@ class Form extends React.Component {
                     )
                 }
             },
-            () => onSubmit && onSubmit(this.state)
+            () => onSubmit && onSubmit(this.getState())
         );
     }
 
     getState() {
         const { state } = this.props;
         return state || this.state;
-    }
-
-    getControlList(children) {
-        return React.Children.toArray(children).reduce((controls, child) => {
-            let updatedControls = controls;
-
-            // Handles simple children like strings
-            if (!child.props) {
-                return controls;
-            }
-
-            // Bind children
-            if (child.props.children) {
-                updatedControls = { ...controls, ...this.getControlList(child.props.children) };
-            }
-
-            // Bind control if bindable type and has name prop
-            if (BINDABLE_CONTROLS.indexOf(child.type.name) > -1 && child.props.name) {
-                const state = this.getState();
-
-                // Determine value
-                let value =
-                    typeof child.props.value !== 'undefined' ? child.props.value : undefined;
-
-                if (
-                    typeof value === 'undefined' &&
-                    state &&
-                    typeof state[child.props.name] !== 'undefined'
-                ) {
-                    value = state[child.props.name];
-                } else if (
-                    typeof value === 'undefined' &&
-                    typeof child.props.defaultValue !== 'undefined'
-                ) {
-                    value = child.props.defaultValue;
-                }
-
-                updatedControls = { ...updatedControls, [child.props.name]: value };
-            }
-
-            return updatedControls;
-        }, {});
     }
 
     getChildren(children) {
@@ -149,21 +219,6 @@ class Form extends React.Component {
             // Bind children
             if (props.children) {
                 props = { ...props, children: this.getChildren(props.children) };
-            }
-
-            // Update validators
-            if (props.name && props.validators) {
-                this.validators[props.name] = props.validators;
-            }
-
-            // Update peerDepencencies
-            if (props.name && props.peerDependencies) {
-                this.peerDependencies[props.name] = props.peerDependencies;
-            }
-
-            // Update isValidChecks
-            if (props.name && props.isValidCheck) {
-                this.isValidChecks[props.name] = props.isValidCheck;
             }
 
             // Bind control if bindable type and has name prop
@@ -206,7 +261,7 @@ class Form extends React.Component {
                     });
                 };
 
-                const { validationState } = this.state;
+                const { validationState } = this.getState();
 
                 // Update the properties
                 props = {
@@ -220,14 +275,11 @@ class Form extends React.Component {
                 // Determine value
                 props = {
                     ...props,
-                    value: or(
-                        [
-                            props.value,
-                            state && state.values && state.values[props.name],
-                            props.defaultValue
-                        ],
-                        undefined
-                    )
+                    value: [
+                        props.value,
+                        { ...{}, ...state.values }[props.name],
+                        props.defaultValue
+                    ].find(value => typeof value !== 'undefined' && value !== null)
                 };
             }
 
@@ -236,56 +288,106 @@ class Form extends React.Component {
         });
     }
 
-    runValidation(fieldName) {
+    runValidation(controlName) {
         // TODO : Really need to find a good way to debounce this validation
-        const { validationState, values: currentStateValues } = this.state;
+        const { validationState, values: currentStateValues } = this.getState();
 
-        // Aggregate the list of validators for controls that need to run validation
-        const validatorsByControl = [
-            fieldName,
-            ...Object.keys(this.peerDependencies[fieldName] || {})
-        ].reduce(
-            (list, controlName) => ({ ...list, [controlName]: this.validators[controlName] || {} }),
+        const dependantPeerControls = getDependentControls(controlName, this.peerDependencies);
+
+        const validatorsByControlName = [controlName, ...dependantPeerControls].reduce(
+            (validators, currentControlName) => ({
+                ...validators,
+                [currentControlName]: this.validators[currentControlName]
+            }),
             {}
         );
 
         const pendingTimeStamp = +new Date();
 
-        // Set all control validation states to pending
+        // Set all control validation states to pending for each control that will validate
         this.setState({
-            validationState: {
-                ...validationState,
-                ...Object.keys(validatorsByControl).reduce(
-                    (pendingControls, controlName) => ({
-                        ...pendingControls,
-                        [controlName]: {
-                            ...validationState[controlName],
-                            pending: [
-                                ...(validationState[controlName].pending || []),
-                                pendingTimeStamp
-                            ]
-                        }
-                    }),
-                    {}
-                )
-            }
+            validationState: pushControlPending(controlName, validationState, pendingTimeStamp)
         });
 
-        // Run validators
         Promise.all(
-            Object.keys(validatorsByControl).map(controlName => {
-                // Collect values
-                const value = currentStateValues[controlName];
-                const peerValues = Object.keys(this.peerDependencies[controlName] || {}).reduce(
+            Object.keys(validatorsByControlName).map(currentControlName => {
+                const value = currentStateValues[currentControlName];
+                const peerValues = Object.keys(
+                    this.peerDependencies[currentControlName] || {}
+                ).reduce(
                     (values, peerName) => ({
                         ...values,
-                        [this.peerDependencies[controlName][peerName]]: currentStateValues[peerName]
+                        [this.peerDependencies[currentControlName][peerName]]:
+                            currentStateValues[peerName]
+                    }),
+                    {}
+                );
+
+                const currentControlValidators = validatorsByControlName[currentControlName] || {};
+
+                return Promise.all(
+                    Object.keys(currentControlValidators).map(validatorName =>
+                        currentControlValidators[validatorName](value, peerValues)
+                    )
+                );
+            })
+        ).then(validationResults => {
+            const { validationState: originalValidationState } = this.getState();
+
+            const validationStateUpdates = Object.keys(validatorsByControlName).reduce(
+                (currentValidationState, currentControlName, controlIndex) => {
+                    const currentControlValidators = validatorsByControlName[currentControlName];
+                    const currentResult = validationResults[controlIndex];
+
+                    const currentControlValidationStateUpdates = Object.keys(
+                        currentControlValidators
+                    ).reduce(
+                        (validationUpdates, currentValidatorName, validatorIndex) => ({
+                            ...validationUpdates,
+                            [currentValidatorName]: currentResult[validatorIndex]
+                        }),
+                        {}
+                    );
+
+                    return updateValidationState(currentControlName, currentValidationState, {
+                        ...currentControlValidationStateUpdates
+                    });
+                },
+                {}
+            );
+
+            const updatedValidationState = Object.keys(validationStateUpdates).reduce(
+                (currentValidationState, currentControlName) =>
+                    updateValidationState(currentControlName, currentValidationState, {
+                        ...validationStateUpdates[currentControlName],
+                        pending: (
+                            { ...{}, ...originalValidationState[currentControlName] }.pending || []
+                        ).filter(pendingKey => pendingKey !== pendingTimeStamp),
+                        valid: (this.isValidChecks[currentControlName] || defaultIsValidationCheck)(
+                            validationStateUpdates[currentControlName]
+                        )
+                    }),
+                originalValidationState
+            );
+
+            this.setState({ validationState: updatedValidationState });
+        });
+
+        /* // Run validators
+        Promise.all(
+            Object.keys(controlsToValidate).map(currentControlName => {
+                // Collect values
+                const value = currentStateValues[currentControlName];
+                const peerValues = Object.keys(this.peerDependencies[currentControlName] || {}).reduce(
+                    (values, peerName) => ({
+                        ...values,
+                        [this.peerDependencies[currentControlName][peerName]]: currentStateValues[peerName]
                     }),
                     {}
                 );
 
                 // Get validators specific to this control
-                const controlValidators = validatorsByControl[controlName];
+                const controlValidators = controlsToValidate[controlName];
 
                 // Run all validators specific to this control
                 return Promise.all(
@@ -298,10 +400,10 @@ class Form extends React.Component {
             const { validationState: postValidationState } = this.state;
 
             // Map the result back to the validatorsByControl object structure
-            let validationUpdates = Object.keys(validatorsByControl).reduce(
+            let validationUpdates = Object.keys(controlsToValidate).reduce(
                 (controlValidators, controlName, controlIndex) => ({
                     ...controlValidators,
-                    [controlName]: Object.keys(validatorsByControl[controlName]).reduce(
+                    [controlName]: Object.keys(controlsToValidate[controlName]).reduce(
                         (validators, validatorName, validatorIndex) => ({
                             ...validators,
                             [validatorName]: validatorResult[controlIndex][validatorIndex]
@@ -350,7 +452,7 @@ class Form extends React.Component {
                     )
                 }
             });
-        });
+        }); */
     }
 
     render() {
@@ -359,11 +461,11 @@ class Form extends React.Component {
 
         const filteredProps = ObjectHelpers.removeKeys(props, PROPS_TO_REMOVE);
 
+        // For post by default so values don't get injected in url query segment
         filteredProps.method = filteredProps.method || 'post';
-        filteredProps.onSubmit = filteredProps.onSubmit || (e => e.preventDefault());
 
         return (
-            <form {...props} onSubmit={e => this.onSubmit(e)}>
+            <form {...filteredProps} onSubmit={e => this.onSubmit(e)}>
                 {this.getChildren(children)}
             </form>
         );

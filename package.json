@@ -4,7 +4,8 @@
   "description": "A react forms library",
   "main": "dist/index.js",
   "dependencies": {
-    "react": "^16.4.1"
+    "react": "^16.4.1",
+    "react-test-renderer": "^16.4.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
