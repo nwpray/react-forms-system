@@ -2,7 +2,6 @@ import React from 'react';
 
 import Control from './Control.component';
 import ObjectHelpers from './ObjectHelpers';
-import ConditionalHelpers from './ConditionalHelpers';
 import ReactHelpers from './ReactHelpers';
 
 const defaultIsValidationCheck = validationState =>
