@@ -125,12 +125,14 @@ class Form extends React.Component {
         });
 
         // Init the form state
-        this.state = { values: bindings.values, validationState: bindings.validationState };
+        this.state = { values: bindings.values, validationState: bindings.validationState, valid: false, dirty: false, touched: false };
 
         // Bind validation data
         this.validators = bindings.validators;
         this.peerDependencies = bindings.peerDependencies;
         this.isValidChecks = bindings.isValidChecks;
+
+        console.log(this.state);
     }
 
     componentDidUpdate(props, state) {
@@ -180,24 +182,26 @@ class Form extends React.Component {
         const { validationState: currentValidationState } = this.getState();
         const { onSubmit } = this.props;
 
-        this.setState(
-            {
-                validationState: {
-                    ...Object.keys(currentValidationState).reduce(
-                        (validationState, controlName) => ({
-                            ...validationState,
-                            [controlName]: {
-                                ...currentValidationState[controlName],
-                                dirty: true,
-                                touched: true
-                            }
-                        }),
-                        {}
-                    )
-                }
-            },
-            () => onSubmit && onSubmit(this.getState())
-        );
+        const stateUpdates = { 
+            validationState: {
+                ...Object.keys(currentValidationState).reduce(
+                    (validationState, controlName) => ({
+                        ...validationState,
+                        [controlName]: {
+                            ...currentValidationState[controlName],
+                            dirty: true,
+                            touched: true
+                        }
+                    }),
+                    {}
+                )
+            }
+        };
+
+        this.setState(stateUpdates);
+
+        if(onSubmit)
+            onSubmit({ ...this.getState, ...stateUpdates });
     }
 
     static getDerivedStateFromProps(props, state){
@@ -405,7 +409,15 @@ class Form extends React.Component {
                 originalValidationState
             );
 
-            this.setState({ validationState: updatedValidationState });
+            const globalValidationState = Object.keys(updatedValidationState).reduce((globalState, currentControlName) => {
+                return {
+                    valid: !updatedValidationState[currentControlName].valid ? false : globalState.valid,
+                    dirty: updatedValidationState[currentControlName].dirty ? true : globalState.dirty,
+                    touched: updatedValidationState[currentControlName].touched ? true : globalState.touched
+                }
+            }, { valid: true, dirty: false, touched: false });
+
+            this.setState({ validationState: { ...updatedValidationState }, ...globalValidationState } );
         });
     }
 
