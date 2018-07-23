@@ -138,8 +138,13 @@ class Form extends React.Component {
         this.validators = bindings.validators;
         this.peerDependencies = bindings.peerDependencies;
         this.isValidChecks = bindings.isValidChecks;
+    }
 
-        Object.keys(bindings.values).forEach((controlName) => this.runValidation(controlName));
+    componentDidMount(){
+        // Collect all controls with the form that are bindable
+        const bindableControls = bindableControlsFromChildren(this.props.children, BINDABLE_CONTROLS);
+
+        bindableControls.forEach((control) => this.runValidation(control.props.name));
     }
 
     componentDidUpdate(props, state) {
@@ -173,7 +178,7 @@ class Form extends React.Component {
 
         const modifiedControlValues = Object.keys(currentStateValues).reduce(
             (modifiedControls, controlName) =>
-                state.values[controlName] !== currentStateValues[controlName]
+                JSON.stringify(state.values[controlName]) !== JSON.stringify(currentStateValues[controlName])
                     ? [...modifiedControls, controlName]
                     : modifiedControls,
             []
@@ -231,8 +236,7 @@ class Form extends React.Component {
                     validationState:{
                         ...updates.validationState,
                         [controlName]: {
-                            ...updates.validationState[controlName],
-                            dirty: true
+                            ...updates.validationState[controlName]
                         }
                     }
                 }
