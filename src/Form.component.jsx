@@ -225,7 +225,7 @@ class Form extends React.Component {
             values: bindControlValue
         });
 
-        const updatedState = Object.keys(bindings.values).reduce((updates, controlName) => {
+        const updatedState = Object.keys(bindings.values || {}).reduce((updates, controlName) => {
             const { props: controlProps } = bindableControls.find((control) => control.props.name === controlName);
             return controlProps.value && controlProps.value !== state.values[controlName] 
                 ? { 
