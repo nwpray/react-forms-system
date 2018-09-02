@@ -35,7 +35,6 @@ This package is still in beta, there are know issues or features that still need
 
 - [Related Projects](#related-projects)
 
-  
 
 ## Features
 
@@ -51,7 +50,6 @@ This package is still in beta, there are know issues or features that still need
 
 - Built in peer control evaluation
 
-  
 
 ## Getting Started
 
@@ -129,7 +127,7 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 | name             | string                     | The name to call the component                               |
 | component        | React.Component            | The component to use as a control                            |
 | value            | any                        | The current value of the control when using in a managed form |
-| defaultValue     | any                        | The initial value of the control when using an unmanaged form |
+| defaultValue     | any                        | The initial value of the control |
 | validators       | {}                         | A map of validators to be apply to this control on value change |
 | peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
 | isValidCheck |(validationState)=>boolean|A predicate function that will be used to determine the overall `valid` key of the controls validationState.|
@@ -221,7 +219,7 @@ Peer dependencies are any other `<Control />` component that the current control
 ```jsx
 <Form.Control 
     ...
-    peerDependencies={{ myValidator: (value, peerValues) => ... }}
+    peerDependencies={{ nameOfPeerControl: 'aliasForPeerControl'}
     ...
 />
 ```
@@ -232,7 +230,7 @@ Peer dependencies are any other `<Control />` component that the current control
 
 ### Managed Form
 
-A managed form lets you manage the state of the form yourself in a HOC around your `<Form />`
+A managed form lets you manage the state of the form yourself
 
 ```jsx
 import React from 'react';
@@ -297,7 +295,7 @@ const UnmanagedForm = () => {
 
 ### Control Wrapper
 
-Each control used in the form must be wrapped in a HOC. The HOC will recieve props from the form and allow the underlying control to render itself appropriately. In addition, any props passed to the `<Form.Control />` component will be passed strait through the the HOC as long as they don't conflict with the `<Form.Control />` API. The underlying component is then also required to apply its own value `value` and fire off events when that value has changed `onValueChange` as well as  to signify a touch of the component `onTouched`.
+Each control used in the form must be wrapped in a HOC. The HOC will recieve props from the form and allow the underlying control to render itself appropriately. In addition, any props passed to the `<Form.Control />` component will be passed strait through the HOC to the underlying control, as long as they don't conflict with the `<Form.Control />` API. The underlying component is then also required to apply its own value `value` and fire off events when that value has changed (`onValueChange`) as well as  to signify a touch of the component (`onTouched`).
 
 ```jsx
 // NameInputComponent.jsx
@@ -318,7 +316,7 @@ export default ({ value, onValueChange, onTouched }) => {
 
 ### Basic Validation
 
-Each control is passed as a property a set of validation states `validationState` as a prop which can be used to render itself appropriately for validation states. The inherent members of `validationState` are dirty, touched, pending and valid. 
+Each control is passed a set of validation states (`validationState`) as a prop, which can be used to render itself appropriately for validation states. The inherent members of `validationState` are dirty, touched, pending and valid. 
 
 **Dirty** - The control has fired the `onValueChange` event
 
@@ -382,12 +380,12 @@ const UnmanagedForm = () => {
 You can pass the prop `peerDependencies` to a control to get it to include a peer controls value in any validators it runs. The following example will only validate the location and provider fields if one of them has a value. The format for passing `peerDependencies` is:
 
 ````javascript
-{{ 'control name': 'validator reference name' }}
+{{ 'control name': 'validator alias name' }}
 ````
 
 **control name** - The name of the peer control
 
-**validator reference name** - the key name you want the value of the target field to be under in peerValues of the validator.
+**validator alias name** - the key name you want the value of the target control to be referenced as under in peerValues of the validator.
 
 ```jsx
 // Form.jsx
