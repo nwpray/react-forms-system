@@ -18,6 +18,9 @@ module.exports = {
     },
     resolve: {
         extensions: [' ', '.js', '.jsx'],
+        alias: {
+            '@': path.resolve('src')
+        }
     },
     devServer: {
         contentBase: path.resolve('dist'),

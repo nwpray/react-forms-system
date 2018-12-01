@@ -4,6 +4,7 @@
   "description": "A react forms library",
   "main": "dist/index.js",
   "dependencies": {
+    "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-test-renderer": "^16.4.2"
   },

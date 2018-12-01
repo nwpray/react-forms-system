@@ -6,6 +6,7 @@
     "rules": {
         "react/prop-types": [false],
         "react/jsx-indent": [ "error", 4 ],
-        "react/no-unused-state": [false]
+        "react/no-unused-state": [false],
+        "react/forbid-prop-types": [false]
     }
 }

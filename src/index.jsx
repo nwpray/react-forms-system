@@ -1,3 +1,3 @@
-import Form from './Form.component';
+import Form from './ContextRefactor/Form';
 
-export { Form };
+export default Form;
