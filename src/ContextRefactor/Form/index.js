@@ -1,7 +1,5 @@
-import Form from './Form.component';
-import Control from '../Control';
+import Form from "./Form.component";
 
-Form.Control = Control;
+export { FormContext } from "./Form.component";
 
-export { FormContext } from './Form.component';
 export default Form;
