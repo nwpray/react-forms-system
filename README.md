@@ -398,3 +398,5 @@ Here is a list of other react form projects that are similar in purpose to `reac
 - Better error messages for poor use of api
 - Test coverage
 - Optimize Depencencies
+- Hosted docs
+- Bundle optimization
