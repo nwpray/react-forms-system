@@ -114,6 +114,7 @@ class Control extends Component {
       };
     }
 
+    // handle managed value changes
     if (
       typeof nextValue !== "undefined" &&
       (!isEqual(prevValue, nextValue) || !isEqual(nextFormValue, nextValue))
@@ -124,20 +125,22 @@ class Control extends Component {
       };
     }
 
-    if (Object.keys(bindingUpdates).length > 0) {
-      updateBindings(prevName, bindingUpdates);
-      return false;
+    // handle unmanaged value changes
+    if (
+      typeof nextValue === "undefined" &&
+      !isEqual(nextFormValue, prevFormValue)
+    ) {
+      bindingUpdates = {
+        ...bindingUpdates,
+        value: nextFormValue
+      };
     }
 
-    console.log("update expected: ", shouldUpdate);
+    if (Object.keys(bindingUpdates).length > 0) {
+      updateBindings(prevName, bindingUpdates);
+    }
 
     return shouldUpdate;
-  }
-
-  componentDidUpdate(prevProps) {
-    console.log(`${this.props.name} did update:`);
-    console.log("componentDidUpdate.currentProps", this.props);
-    console.log("componentDidUpdate.prevProps", prevProps);
   }
 
   handleChange(value) {

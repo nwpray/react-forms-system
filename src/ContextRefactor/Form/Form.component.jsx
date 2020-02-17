@@ -2,6 +2,7 @@ import React from "react";
 import Component from "@/core/Component";
 import PropTypes from "prop-types";
 import { isFunction } from "lodash";
+import uuid from "uuid/v4";
 
 import { removeKeys } from "@/ObjectHelpers";
 
@@ -22,12 +23,13 @@ class Form extends Component {
   constructor(props) {
     super(props);
     this.state = INIT_STATE;
+    this.uuid = uuid();
   }
 
-  setState(updates) {
+  setState(updates, ...restOfArgs) {
     const { onStateChange } = this.props;
 
-    super.setState(updates);
+    super.setState(updates, ...restOfArgs);
 
     onStateChange(
       isFunction(updates) ? updates(this.state) : { ...this.state, ...updates }
@@ -49,11 +51,11 @@ class Form extends Component {
     const { name: newName, value } = updates;
     const name = newName || oldName;
 
-    console.log(updates);
-
     this.applyMutations([
       ...(newName ? [mutations.changeControlName(oldName, newName)] : []),
-      ...(value ? [mutations.updateValue(name, value)] : [])
+      ...(typeof value !== "undefined"
+        ? [mutations.updateValue(name, value)]
+        : [])
     ]);
   }
 
