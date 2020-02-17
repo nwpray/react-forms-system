@@ -288,9 +288,11 @@ Each control is passed a set of validation states (`validationState`) as a prop,
 
 **Touched** - The control has fired the `onTouched` event
 
-**Pending** - One or more of the validators is still running. Pending is actually an array of timestamps signifying the start of a validation sequence. If the array is empty the validation is not pending otherwise at least one validation sequence is pending completion.
+**Pending** - One or more of the validators is still running.
 
 **Valid** - All the validators return true or `isValidCheck` callback returns true
+
+These four validation states are also available globally to the whole form directly under the `validationState` key. a.k.a. `validationState.dirt` expresses whether or not the form is dirty. The meanings for the form level keys are the same.
 
 ```jsx
 // NameInputComponent.jsx
