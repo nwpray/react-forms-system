@@ -1,6 +1,22 @@
 # React Forms System
 
-An npm package for building and managing form state with react.
+Yet another react forms library.... Don't worry there are some new ideas as well as refined ideas from other libraries that will make your life so much easier.
+
+
+
+*Why use this package?*
+
+React Forms System is a simple forms state management library that provides powerful validation api. The biggest perk is that it does not get into the game of building out its own UI, and instead relies heavily on the inversion of control pattern. Things like component implementation, validation messages and validators are left up to the user to implement. This inversion of control allows virtually any UI components from any library to be used with this library. In summary, React Forms System tries to do only a few things but do them well.
+
+
+
+*What sets this apart?*
+
+The biggest thing that sets this library apart is how expressive the built in validation states are and the built in ability to validate using values from other control values within the form. The validation states are heavily influenced by angular form validation which gives an amazing amount of flexibility to control not only if there are validation errors but if the user should be blasted by validation messages before they have even had an opportunity to interact with the form. 
+
+A second big thing that sets this library apart is its `Control` component and how simple and flexible the api is. The `Control` component definitely leans on the BYOC (bring your own component) paradigm. The api is neat because it tells you what the value of your control is and its validation state and in return your control only needs to tell the form when the value changes and optionally when it should be considered `touched`. 
+
+
 
 ### Contents
 
@@ -70,11 +86,11 @@ $ npm i react-forms-system
 
 ##### Props
 
-| Prop          | Type              | Description                                                                                                                    |
-| ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Prop          | Type              | Description                                                  |
+| ------------- | ----------------- | ------------------------------------------------------------ |
 | onSubmit      | (FormState)=>void | onSubmit is called any time the html form submit event is called. It passes the entire state of the form as its only argument. |
-| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument.       |
-| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component.                                   |
+| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument. |
+| ...           | ...               | All other props passed will be directly applied to the underlying html `<form />` component. |
 
 ##### Basic Form
 
@@ -116,7 +132,7 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 
 ```jsx
 // Common use for a unmanaged form
-// Must use `defaultValue` prop for unmanaged form
+// Must use `defaultValue` prop for unmanaged form controls
 <Form.Control
     name="myControlName"
     component={MyControlComponent}
@@ -132,6 +148,8 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 ```
 
 ##### Wrapper Interface
+
+An example of the props that are passed by the `Control` component. 
 
 ```jsx
 const MyControlComponent = ({ name, value, onValueChange, onTouched, validationState }) = {
@@ -240,7 +258,7 @@ class ManagedForm extends React.Component {
 
 ### Unmanaged Form
 
-An unmanaged form manages its own state internally
+An unmanaged form manages its own state internally. Notice that all controls have a `defaultValue` which is required for unmanaged forms.
 
 ```jsx
 import React from "react";
@@ -253,9 +271,13 @@ const UnmanagedForm = () => {
       <Form.Control
         name="firstName"
         component={NameInputComponent}
-        defaultValue={""}
+        defaultValue=""
       />
-      <Form.Control name="lastName" component={NameInputComponent} value={""} />
+      <Form.Control
+        name="lasName"
+        component={NameInputComponent}
+        defaultValue=""
+      />
     </Form>
   );
 };
@@ -402,3 +424,6 @@ Here is a list of other react form projects that are similar in purpose to `reac
 - Optimize Depencencies
 - Hosted docs
 - Bundle optimization
+- Supporting package with prebuilt controls
+- Supporting package with common validators
+- More examples
