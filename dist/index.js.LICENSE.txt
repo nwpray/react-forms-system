@@ -8,7 +8,7 @@
 
 /*! exports provided: formValue, validationState, component, name, isValidCheck, peerDependencies, validators, value */
 
-/*! exports provided: updateValue, updateControlValidation, changeControlName, applyValidation */
+/*! exports provided: updateValue, updateGlobalValidation, updateControlValidation, changeControlName */
 
 /*! no static exports found */
 

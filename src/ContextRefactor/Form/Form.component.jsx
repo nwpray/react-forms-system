@@ -35,9 +35,12 @@ class Form extends Component {
 
     super.setState(updates, ...restOfArgs);
 
-    onStateChange(
-      isFunction(updates) ? updates(this.state) : { ...this.state, ...updates }
-    );
+    onStateChange &&
+      onStateChange(
+        isFunction(updates)
+          ? updates(this.state)
+          : { ...this.state, ...updates }
+      );
   }
 
   bindControl(name, initValue, validators, peerDependencies, isValidCheck) {
