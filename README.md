@@ -5,12 +5,10 @@ An npm package for building and managing form state with react.
 ### Contents
 
 - [Features](#features)
-
 - [Getting Started](#getting-started)
 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-
 - [Components](#components)
 
   - [Form](#form)
@@ -21,7 +19,6 @@ An npm package for building and managing form state with react.
     - [Wrapper Interface](#wrapper-interface)
     - [Validator](#validator)
     - [Peer Dependencies](#peer-dependencies)
-
 - [Examples](#Examples)
 
   - [Managed Form](#managed-form)
@@ -29,8 +26,8 @@ An npm package for building and managing form state with react.
   - [Control Wrapper](#control-wrapper)
   - [Basic Validation](#basic-validation)
   - [Cross Control Validation](#cross-control-validation)
-
 - [Related Projects](#related-projects)
+- [Roadmap](#roadmap)
 
 ## Features
 
@@ -66,15 +63,15 @@ $ npm i react-forms-system
 
 ### Form
 
-`<Form />` is a HOC that manages and maintains the state of all the `<control />` that are nested below it.
+`<Form />` is a HOC that manages and maintains the state of all the `<Control />` that are nested below it.
 
 ##### Props
 
-| Prop          | Type              | Description                                                                                                               |
-| ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| onSubmit      | (FormState)=>void | onSubmit is called any time the html submit event is called. It passes the entire state of the form as its only argument. |
-| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument.  |
-| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component.                              |
+| Prop          | Type              | Description                                                  |
+| ------------- | ----------------- | ------------------------------------------------------------ |
+| onSubmit      | (FormState)=>void | onSubmit is called any time the html form submit event is called. It passes the entire state of the form as its only argument. |
+| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument. |
+| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component. |
 
 ##### Basic Form
 
@@ -101,44 +98,47 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 
 ##### Props
 
-| Prop             | Type                       | Description                                                                                                               |
-| ---------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| name             | string                     | The name to call the component                                                                                            |
-| component        | React.Component            | The component to use as a control                                                                                         |
-| value            | any                        | The current value of the control when using in a managed form                                                             |
-| defaultValue     | any                        | The initial value of the control                                                                                          |
-| validators       | {}                         | A map of validators to be apply to this control on value change                                                           |
+| Prop             | Type                       | Description                                                  |
+| ---------------- | -------------------------- | ------------------------------------------------------------ |
+| name             | string                     | The name to call the component                               |
+| component        | React.Component            | The component to use as a control                            |
+| value            | any                        | The current value of the control when using in a managed form |
+| defaultValue     | any                        | The initial value of the control                             |
+| validators       | {}                         | A map of validators to be apply to this control on value change |
 | peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
-| isValidCheck     | (validationState)=>boolean | A predicate function that will be used to determine the overall `valid` key of the controls validationState.              |
-| ...              | ...                        | All other props will be applied to the component passed in `component` prop.                                              |
+| isValidCheck     | (validationState)=>boolean | A predicate that will be used to determine the overall `valid` key of the controls validationState. The default validator considers any false validation values to be considered `valid: false` |
+| ...              | ...                        | All other props will be forwarded to the control wrapper passed in `component` prop. |
 
 ##### Basic Control
 
 ```jsx
 // Common use for a unmanaged form
+// Must use `defaultValue` prop for unmanaged form
 <Form.Control
     name="myControlName"
     component={MyControlComponent}
-    defaultValue={''}
+    defaultValue=""
 />
 
 // Common use for a managed form
 <Form.Control
     name="myControlName"
     component={MyControlComponent}
-    value={''}
+    value=""
 />
 ```
 
 ##### Wrapper Interface
 
 ```jsx
-const MyControlComponent = ({ value, onValueChange, onTouched, validationState }) = {
+const MyControlComponent = ({ name, value, onValueChange, onTouched, validationState }) = {
     return (
  		// ...wrapped component to be used as a control goes here
     );
 };
 ```
+
+> See [Control Wrapper](#control-wrapper) for example
 
 ##### Validator
 
@@ -178,10 +178,12 @@ const required = (value) => !!value;
 <Form.Control
     ...
     validators={{ required }}
-    isValidCheck={(validationState) => validationState.required }
+    isValidCheck={(validationState) => !!validationState.required }
     ...
 />
 ```
+
+> See [Basic Validation](#basic-validation) for example
 
 ##### Peer Dependencies
 
@@ -194,6 +196,8 @@ Peer dependencies are any other `<Control />` component that the current control
     ...
 />
 ```
+
+>  See [Cross control validation](#cross-control-validation) for an example
 
 ## Examples
 
@@ -384,3 +388,10 @@ Here is a list of other react form projects that are similar in purpose to `reac
 
 - https://www.npmjs.com/package/informed
 - https://www.npmjs.com/package/formik
+
+## Roadmap
+
+- React Native Compatability
+- Better error messages for poor use of api
+- Test coverage
+
