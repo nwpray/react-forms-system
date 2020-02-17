@@ -1,7 +1,7 @@
 import React from "react";
 import Component from "@/core/Component";
 import PropTypes from "prop-types";
-import { isFunction } from "lodash";
+import { isFunction, update } from "lodash";
 import uuid from "uuid/v4";
 
 import { removeKeys } from "@/ObjectHelpers";
@@ -19,11 +19,15 @@ const INIT_STATE = {
 
 const PROPS_TO_REMOVE = ["onStateChange"];
 
+const defaultIsValid = validationResults =>
+  !Object.keys(validationResults).some(key => validationResults[key] === false);
+
 class Form extends Component {
   constructor(props) {
     super(props);
     this.state = INIT_STATE;
     this.uuid = uuid();
+    this.bindings = {};
   }
 
   setState(updates, ...restOfArgs) {
@@ -36,7 +40,31 @@ class Form extends Component {
     );
   }
 
-  bindControl(name, initValue) {
+  bindControl(name, initValue, validators, peerDependencies) {
+    if (!this.bindings[name]) {
+      this.bindings[name] = {};
+    }
+
+    this.bindings[name] = {
+      ...this.bindings[name],
+      validators,
+      peerDependencies
+    };
+
+    const dependsOn = Object.keys(peerDependencies);
+
+    dependsOn.forEach(dependencyName => {
+      if (!this.bindings[dependencyName]) {
+        this.bindings[dependencyName] = { dependantOf: [] };
+      }
+
+      this.bindings = update(
+        this.bindings,
+        [dependencyName, "dependantOf"],
+        prevList => [...(prevList || []), name]
+      );
+    });
+
     this.applyMutations([
       mutations.updateValue(name, initValue),
       mutations.updateControlValidation(name, {
@@ -51,12 +79,15 @@ class Form extends Component {
     const { name: newName, value } = updates;
     const name = newName || oldName;
 
-    this.applyMutations([
-      ...(newName ? [mutations.changeControlName(oldName, newName)] : []),
-      ...(typeof value !== "undefined"
-        ? [mutations.updateValue(name, value)]
-        : [])
-    ]);
+    this.applyMutations(
+      [
+        ...(newName ? [mutations.changeControlName(oldName, newName)] : []),
+        ...(typeof value !== "undefined"
+          ? [mutations.updateValue(name, value)]
+          : [])
+      ],
+      () => this.triggerValidation(name)
+    );
   }
 
   handleSubmit(e) {
@@ -79,10 +110,72 @@ class Form extends Component {
       this.applyMutations([
         ...(changed ? [mutations.updateValue(name, value)] : []),
         ...(!dirty
-          ? [mutations.updateControlValidation(name, { dirty: true })]
+          ? [
+              mutations.updateControlValidation(name, {
+                dirty: true
+              })
+            ]
           : [])
       ]);
     }
+  }
+
+  async triggerValidation(name) {
+    const { dependantOf } = this.bindings[name] || {};
+    const { values } = this.state;
+
+    const controlsToUpdate = [name, ...(dependantOf || [])];
+
+    this.applyMutations(
+      controlsToUpdate.map(controlName =>
+        mutations.updateControlValidation(controlName, { pending: true })
+      )
+    );
+
+    const validationResults = await Promise.all(
+      controlsToUpdate.map(controlName =>
+        this.validateSingleControl(controlName, values[controlName])
+      )
+    );
+
+    this.applyMutations(
+      validationResults.map((result, index) =>
+        mutations.updateControlValidation(controlsToUpdate[index], {
+          ...result,
+          pending: false
+        })
+      )
+    );
+  }
+
+  async validateSingleControl(name, value) {
+    const { values } = this.state;
+    const { validators, peerDependencies } = this.bindings[name] || {};
+
+    const peerValues = Object.keys(peerDependencies).reduce(
+      (prevValues, peerName) => {
+        const peerKey = peerDependencies[peerName];
+
+        return {
+          ...prevValues,
+          [peerKey]: values[peerName]
+        };
+      },
+      {}
+    );
+
+    const validatorKeys = Object.keys(validators);
+
+    const results = await Promise.all(
+      validatorKeys.map(key => validators[key](value, peerValues))
+    );
+
+    const remappedResults = results.reduce((prevMap, result, index) => {
+      const key = validatorKeys[index];
+      return { ...prevMap, [key]: result };
+    }, {});
+
+    return { ...remappedResults, valid: defaultIsValid(remappedResults) };
   }
 
   handleTouched(name) {

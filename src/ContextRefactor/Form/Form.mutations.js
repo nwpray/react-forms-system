@@ -30,3 +30,7 @@ export const changeControlName = (oldName, newName) => state => ({
     [newName]: state.validationState[oldName]
   }
 });
+
+export const applyValidation = async (validators, value) => state => {
+  return null;
+};

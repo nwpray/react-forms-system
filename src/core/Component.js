@@ -2,15 +2,17 @@ import React from "react";
 import { isArray } from "lodash";
 
 export default class Component extends React.Component {
-  applyMutations(mutations) {
+  applyMutations(mutations, callback) {
     if (isArray(mutations)) {
-      this.setState(state =>
-        mutations.reduce((newState, mutation) => mutation(newState), state)
+      this.setState(
+        state =>
+          mutations.reduce((newState, mutation) => mutation(newState), state),
+        callback
       );
       return;
     }
 
-    this.setState(mutations);
+    this.setState(mutations, callback);
   }
 
   select(selectors, state = null) {

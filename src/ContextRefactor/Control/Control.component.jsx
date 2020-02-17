@@ -44,7 +44,12 @@ class Control extends Component {
 
     const { name, bindControl } = props;
 
-    bindControl(name, getValueFromProps(props));
+    bindControl(
+      name,
+      getValueFromProps(props),
+      props.validators,
+      props.peerDependencies
+    );
   }
 
   shouldComponentUpdate(nextProps) {
@@ -164,10 +169,11 @@ class Control extends Component {
     return (
       <PassedComponent
         {...restOfProps}
+        name={name}
         onChange={this.handleChange.bind(this)}
         onTouch={this.handleTouch.bind(this)}
         value={getValueFromProps(this.props)}
-        validationState={this.selectProps(selectors.validationState())}
+        validationState={this.selectProps(selectors.validationState()) || {}}
       />
     );
   }
