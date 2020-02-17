@@ -9,6 +9,7 @@ An npm package for building and managing form state with react.
 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+
 - [Components](#components)
 
   - [Form](#form)
@@ -19,6 +20,7 @@ An npm package for building and managing form state with react.
     - [Wrapper Interface](#wrapper-interface)
     - [Validator](#validator)
     - [Peer Dependencies](#peer-dependencies)
+
 - [Examples](#Examples)
 
   - [Managed Form](#managed-form)
@@ -26,6 +28,7 @@ An npm package for building and managing form state with react.
   - [Control Wrapper](#control-wrapper)
   - [Basic Validation](#basic-validation)
   - [Cross Control Validation](#cross-control-validation)
+
 - [Related Projects](#related-projects)
 - [Roadmap](#roadmap)
 
@@ -67,11 +70,11 @@ $ npm i react-forms-system
 
 ##### Props
 
-| Prop          | Type              | Description                                                  |
-| ------------- | ----------------- | ------------------------------------------------------------ |
+| Prop          | Type              | Description                                                                                                                    |
+| ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | onSubmit      | (FormState)=>void | onSubmit is called any time the html form submit event is called. It passes the entire state of the form as its only argument. |
-| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument. |
-| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component. |
+| onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument.       |
+| ....          | ....              | All other props passed will be directly applied to the underlying html `<form />` component.                                   |
 
 ##### Basic Form
 
@@ -98,16 +101,16 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 
 ##### Props
 
-| Prop             | Type                       | Description                                                  |
-| ---------------- | -------------------------- | ------------------------------------------------------------ |
-| name             | string                     | The name to call the component                               |
-| component        | React.Component            | The component to use as a control                            |
-| value            | any                        | The current value of the control when using in a managed form |
-| defaultValue     | any                        | The initial value of the control                             |
-| validators       | {}                         | A map of validators to be apply to this control on value change |
-| peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
+| Prop             | Type                       | Description                                                                                                                                                                                     |
+| ---------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name             | string                     | The name to call the component                                                                                                                                                                  |
+| component        | React.Component            | The component to use as a control                                                                                                                                                               |
+| value            | any                        | The current value of the control when using in a managed form                                                                                                                                   |
+| defaultValue     | any                        | The initial value of the control                                                                                                                                                                |
+| validators       | {}                         | A map of validators to be apply to this control on value change                                                                                                                                 |
+| peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators.                                                                       |
 | isValidCheck     | (validationState)=>boolean | A predicate that will be used to determine the overall `valid` key of the controls validationState. The default validator considers any false validation values to be considered `valid: false` |
-| ...              | ...                        | All other props will be forwarded to the control wrapper passed in `component` prop. |
+| ...              | ...                        | All other props will be forwarded to the control wrapper passed in `component` prop.                                                                                                            |
 
 ##### Basic Control
 
@@ -197,7 +200,7 @@ Peer dependencies are any other `<Control />` component that the current control
 />
 ```
 
->  See [Cross control validation](#cross-control-validation) for an example
+> See [Cross control validation](#cross-control-validation) for an example
 
 ## Examples
 
@@ -394,4 +397,4 @@ Here is a list of other react form projects that are similar in purpose to `reac
 - React Native Compatability
 - Better error messages for poor use of api
 - Test coverage
-
+- Optimize Depencencies
