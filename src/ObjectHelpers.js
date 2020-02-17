@@ -3,7 +3,7 @@
  *
  * TODO : Document applyValue
  */
-const applyValue = (subjectObj, value) =>
+export const applyValue = (subjectObj, value) =>
     Object.keys(subjectObj).reduce(
         (newState, currentKey) => ({ ...newState, [currentKey]: value }),
         {}
@@ -19,7 +19,7 @@ const applyValue = (subjectObj, value) =>
  *
  * @return (object) - A clone of 'subjectObj' that only has keys from 'keys'
  */
-const chooseKeys = (subjectObj, keys) =>
+export const chooseKeys = (subjectObj, keys) =>
     Object.keys(subjectObj).reduce(
         (newObj, currentKey) =>
             keys.indexOf(currentKey) < 0
@@ -38,7 +38,7 @@ const chooseKeys = (subjectObj, keys) =>
  *
  * @return (object) - A clone of 'subjectObj' with 'keys' removed
  */
-const removeKeys = (subjectObj, keys) =>
+export const removeKeys = (subjectObj, keys) =>
     Object.keys(subjectObj).reduce(
         (newObj, currentKey) =>
             keys.indexOf(currentKey) > -1

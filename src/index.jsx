@@ -1,3 +1,6 @@
-import Form from './Form.component';
+import Control from "./ContextRefactor/Control";
+import Form from "./ContextRefactor/Form";
 
-export { Form };
+Form.Control = Control;
+
+export default Form;
