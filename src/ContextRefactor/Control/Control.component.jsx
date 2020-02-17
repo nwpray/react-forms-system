@@ -48,7 +48,8 @@ class Control extends Component {
       name,
       getValueFromProps(props),
       props.validators,
-      props.peerDependencies
+      props.peerDependencies,
+      props.isValidCheck
     );
   }
 

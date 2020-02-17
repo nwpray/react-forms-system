@@ -19,7 +19,7 @@ const INIT_STATE = {
 
 const PROPS_TO_REMOVE = ["onStateChange"];
 
-const defaultIsValid = validationResults =>
+const defaultIsValidCheck = validationResults =>
   !Object.keys(validationResults).some(key => validationResults[key] === false);
 
 class Form extends Component {
@@ -40,7 +40,7 @@ class Form extends Component {
     );
   }
 
-  bindControl(name, initValue, validators, peerDependencies) {
+  bindControl(name, initValue, validators, peerDependencies, isValidCheck) {
     if (!this.bindings[name]) {
       this.bindings[name] = {};
     }
@@ -48,7 +48,8 @@ class Form extends Component {
     this.bindings[name] = {
       ...this.bindings[name],
       validators,
-      peerDependencies
+      peerDependencies,
+      isValidCheck
     };
 
     const dependsOn = Object.keys(peerDependencies);
@@ -150,7 +151,8 @@ class Form extends Component {
 
   async validateSingleControl(name, value) {
     const { values } = this.state;
-    const { validators, peerDependencies } = this.bindings[name] || {};
+    const { validators, peerDependencies, isValidCheck } =
+      this.bindings[name] || {};
 
     const peerValues = Object.keys(peerDependencies).reduce(
       (prevValues, peerName) => {
@@ -175,7 +177,10 @@ class Form extends Component {
       return { ...prevMap, [key]: result };
     }, {});
 
-    return { ...remappedResults, valid: defaultIsValid(remappedResults) };
+    return {
+      ...remappedResults,
+      valid: (isValidCheck || defaultIsValidCheck)(remappedResults)
+    };
   }
 
   handleTouched(name) {
