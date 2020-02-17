@@ -284,13 +284,13 @@ export default ({ value, onValueChange, onTouched }) => {
 
 Each control is passed a set of validation states (`validationState`) as a prop, which can be used to render itself appropriately for validation states. The inherent members of `validationState` are dirty, touched, pending and valid.
 
-**Dirty** - The control has fired the `onValueChange` event
+**dirty** - The control has fired the `onValueChange` event
 
-**Touched** - The control has fired the `onTouched` event
+**touched** - The control has fired the `onTouched` event
 
-**Pending** - One or more of the validators is still running.
+**pending** - One or more of the validators is still running.
 
-**Valid** - All the validators return true or `isValidCheck` callback returns true
+**valid** - All the validators return true or `isValidCheck` callback returns true
 
 These four validation states are also available globally to the whole form directly under the `validationState` key. a.k.a. `validationState.dirty` expresses whether or not the form is dirty. The meanings for the form level keys are the same.
 
