@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { isEqual } from "lodash";
 
 import Component from "@/core/Component";
+import { removeKeys } from "@/ObjectHelpers";
 
 import * as selectors from "./Control.selectors";
 
@@ -37,6 +38,15 @@ const getValueFromProps = props => {
 
   return null;
 };
+
+const PROPS_TO_REMOVE = [
+  "isValidCheck",
+  "peerDependencies",
+  "onTouched",
+  "onValueChange",
+  "updateBindings",
+  "bindControl"
+];
 
 class Control extends Component {
   constructor(props) {
@@ -179,7 +189,7 @@ class Control extends Component {
 
     return (
       <PassedComponent
-        {...restOfProps}
+        {...removeKeys(restOfProps, PROPS_TO_REMOVE)}
         name={name}
         onChange={!submit ? this.handleChange.bind(this) : undefined}
         onTouch={!submit ? this.handleTouch.bind(this) : undefined}

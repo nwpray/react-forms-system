@@ -179,7 +179,7 @@ A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to a
 An example of the props that are passed by the `Control` component.
 
 ```jsx
-const MyControlComponent = ({ name, value, onChange, onTouched, validationState }) = {
+const MyControlComponent = ({ name, value, onChange, onTouch, validationState }) = {
     return (
  		// ...wrapped component to be used as a control goes here
     );
@@ -249,7 +249,7 @@ Peer dependencies are any other `<Control />` component that the current control
 
 ##### Submit
 
-Controls can be turned into a submittable by adding the prop `submit`. Any control that has the prop submit will no longer send `value`, `onChange`, `onTouched` or `validationState`. Instead it will recieve the callback `onSubmit` which will trigger a form submit. In addition the
+Controls can be turned into a submittable by adding the prop `submit`. Any control that has the prop submit will no longer send `value`, `onChange`, `onTouch` or `validationState`. Instead it will recieve the callback `onSubmit` which will trigger a form submit. In addition the
 
 ```jsx
 const CustomSubmit = ({ onSubmit }) => (<button onClick={onSubmit}>Submit</button>);
@@ -326,18 +326,18 @@ const UnmanagedForm = () => {
 
 ### Control Wrapper
 
-Each control used in the form must be wrapped in a HOC. The HOC will recieve props from the form and allow the underlying control to render itself appropriately. In addition, any props passed to the `<Form.Control />` component will be passed strait through the HOC to the underlying control, as long as they don't conflict with the `<Form.Control />` API. The underlying component is then also required to apply its own value `value` and fire off events when that value has changed (`onChange`) as well as to signify a touch of the component (`onTouched`).
+Each control used in the form must be wrapped in a HOC. The HOC will recieve props from the form and allow the underlying control to render itself appropriately. In addition, any props passed to the `<Form.Control />` component will be passed strait through the HOC to the underlying control, as long as they don't conflict with the `<Form.Control />` API. The underlying component is then also required to apply its own value `value` and fire off events when that value has changed (`onChange`) as well as to signify a touch of the component (`onTouch`).
 
 ```jsx
 // NameInputComponent.jsx
 import React from "react";
 
-export default ({ value, onChange, onTouched }) => {
+export default ({ value, onChange, onTouch }) => {
   return (
     <input
       value={value}
       onChange={e => onChange(e.target.value)}
-      onClick={e => onTouched()}
+      onClick={e => onTouch()}
     />
   );
 };
@@ -349,7 +349,7 @@ Each control is passed a set of validation states (`validationState`) as a prop,
 
 **dirty** - The control has fired the `onChange` event
 
-**touched** - The control has fired the `onTouched` event
+**touched** - The control has fired the `onTouch` event
 
 **pending** - One or more of the validators is still running.
 
@@ -361,7 +361,7 @@ These four validation states are also available globally to the whole form direc
 // NameInputComponent.jsx
 import React from 'react';
 
-export default ({ value, onChange, onTouched, validationState }) => {
+export default ({ value, onChange, onTouch, validationState }) => {
     const className = (validationState.touched || validationState.dirty) &&
           validationState.valid ? '' : 'invalid';
     return (
@@ -369,7 +369,7 @@ export default ({ value, onChange, onTouched, validationState }) => {
             className={className}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            onClick={(e) => onTouched()}
+            onClick={(e) => onTouch()}
         />
     );
 };
