@@ -1,5 +1,7 @@
 # React Forms System
 
+NOW REACT NATIVE COMPATABLE!!
+
 Yet another react forms library.... Don't worry there are some new ideas as well as refined ideas from other libraries that will make your life so much easier.
 
 
@@ -25,42 +27,40 @@ A second big thing that sets this library apart is its `Control` component and h
 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+  - [React Native](#react-native)
 
 - [Components](#components)
 
   - [Form](#form)
     - [Basic Form](#basic-form)
     - [Form State](#form-state)
+    - [Submit Source](#submit-source)
   - [Control](#control)
     - [Basic Control](#basic-control)
     - [Wrapper Interface](#wrapper-interface)
     - [Validator](#validator)
     - [Peer Dependencies](#peer-dependencies)
+    - [Submit](#submit)
 
 - [Examples](#Examples)
-
-  - [Managed Form](#managed-form)
+- [Managed Form](#managed-form)
   - [Unmanaged Form](#unmanaged-form)
   - [Control Wrapper](#control-wrapper)
   - [Basic Validation](#basic-validation)
   - [Cross Control Validation](#cross-control-validation)
-
+  
 - [Related Projects](#related-projects)
 - [Roadmap](#roadmap)
 
 ## Features
 
 - Minimal library components
-
 - Control level and form level validation
-
 - Managed or unmanaged state
-
 - Dirty, touched and pending states
-
 - Customizable controls
-
 - Built in peer control evaluation
+- React Web and React Native compatible
 
 ## Getting Started
 
@@ -78,6 +78,22 @@ $ npm i react
 $ npm i react-forms-system
 ```
 
+
+
+### React Native
+
+The only requirement to get this to work for react native is to pass a different  `component`  prop to the `Form`  with a react native compatable component. `View` should do just fine (and is really the only thing I have tested up to this point)
+
+```jsx
+import { View } from 'react-native';
+...
+<Form onSubmit={...} component={View} >
+...
+</Form>
+```
+
+
+
 ## Components
 
 ### Form
@@ -90,7 +106,8 @@ $ npm i react-forms-system
 | ------------- | ----------------- | ------------------------------------------------------------ |
 | onSubmit      | (FormState)=>void | onSubmit is called any time the html form submit event is called. It passes the entire state of the form as its only argument. |
 | onStateChange | (FormState)=>void | onStateChange is called every time there is a state update. It passes the entire state of the form as its only argument. |
-| ...           | ...               | All other props passed will be directly applied to the underlying html `<form />` component. |
+| component     | React.Component   | If you want to use a different underlying component for the form besides and html `<form />`  then pass it here. `View` is the only react native component that has been tested with this prop atm. |
+| ...           | ...               | All other props passed will be directly applied to the underlying html `<form />` component or the passed `component`. |
 
 ##### Basic Form
 
@@ -111,22 +128,43 @@ The form state can very based off your Controls, but the root of the form state 
 }
 ```
 
+##### Submit Source
+
+The second argument passed to the onSubmit callback will be the submit source. In the case of an html form submit, the value will be `native_submit`. In the case of a custom submit control, it will be the name of the control.
+
+```jsx
+import CustomSubmit from './some/path/CustomSubmit';
+
+// Should log 'native_submit'
+<Form onSubmit={(formState, source) => console.log(source)}>
+  <button type="submit">Submit</button>
+</Form>
+
+// Should log 'customSubmit'
+<Form onSubmit={(formState, source) => console.log(source)}>
+  <Form.Control name="customSubmit" component={CustomSubmit} submit />
+</Form>
+```
+
+
+
 ### Control
 
 A `<Control />` is a HOC that wraps and provides all `<Form />` interaction to any controls you would like to use in your form.
 
 ##### Props
 
-| Prop             | Type                       | Description                                                                                                                                                                                     |
-| ---------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name             | string                     | The name to call the component                                                                                                                                                                  |
-| component        | React.Component            | The component to use as a control                                                                                                                                                               |
-| value            | any                        | The current value of the control when using in a managed form                                                                                                                                   |
-| defaultValue     | any                        | The initial value of the control                                                                                                                                                                |
-| validators       | {}                         | A map of validators to be apply to this control on value change                                                                                                                                 |
-| peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators.                                                                       |
+| Prop             | Type                       | Description                                                  |
+| ---------------- | -------------------------- | ------------------------------------------------------------ |
+| name             | string                     | The name to call the component                               |
+| component        | React.Component            | The component to use as a control                            |
+| value            | any                        | The current value of the control when using in a managed form |
+| defaultValue     | any                        | The initial value of the control                             |
+| validators       | {}                         | A map of validators to be apply to this control on value change |
+| peerDependencies | {}                         | A list of peer `<Control />` components names whos values will need to be used in one or more of the controls validators. |
 | isValidCheck     | (validationState)=>boolean | A predicate that will be used to determine the overall `valid` key of the controls validationState. The default validator considers any false validation values to be considered `valid: false` |
-| ...              | ...                        | All other props will be forwarded to the control wrapper passed in `component` prop.                                                                                                            |
+| submit           | bool                       | If `true` this control will now be treated as a submittable. `value`, `defaultValue`, `validators`, `peerDependencies` and `isValidCheck` will no longer have any effect when this is enabled. |
+| ...              | ...                        | All other props will be forwarded to the control wrapper passed in `component` prop. |
 
 ##### Basic Control
 
@@ -220,6 +258,22 @@ Peer dependencies are any other `<Control />` component that the current control
 
 > See [Cross control validation](#cross-control-validation) for an example
 
+##### Submit
+
+Controls can be turned into a submittable by adding the prop `submit`. Any control that has the prop submit will no longer send `value`, `onValueChange`, `onTouched` or `validationState`. Instead it will recieve the callback `onSubmit` which will trigger a form submit. In addition the 
+
+```jsx
+const CustomSubmit = ({ onSubmit }) => (<button onClick={onSubmit}>Submit</button>);
+...
+<Form.Control 
+	name="custom_submit" 
+	component={CustomSubmit} 
+	submit 
+/>
+```
+
+
+
 ## Examples
 
 ### Managed Form
@@ -274,7 +328,7 @@ const UnmanagedForm = () => {
         defaultValue=""
       />
       <Form.Control
-        name="lasName"
+        name="lastName"
         component={NameInputComponent}
         defaultValue=""
       />
@@ -418,7 +472,6 @@ Here is a list of other react form projects that are similar in purpose to `reac
 
 ## Roadmap
 
-- React Native Compatability
 - Better error messages for poor use of api
 - Test coverage
 - Optimize Depencencies

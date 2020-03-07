@@ -42,7 +42,9 @@ class Control extends Component {
   constructor(props) {
     super(props);
 
-    const { name, bindControl } = props;
+    const { name, bindControl, submit } = props;
+
+    if (submit) return;
 
     bindControl(
       name,
@@ -54,7 +56,9 @@ class Control extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { updateBindings } = this.props;
+    const { updateBindings, submit } = this.props;
+
+    if (submit) return true;
 
     const compareSelectors = [
       selectors.component(),
@@ -159,11 +163,17 @@ class Control extends Component {
     onTouched(name);
   }
 
+  handleSubmit() {
+    const { name, onSubmit } = this.props;
+    onSubmit(name);
+  }
+
   render() {
     const {
       name,
       formState,
       component: PassedComponent,
+      submit,
       ...restOfProps
     } = this.props;
 
@@ -171,10 +181,15 @@ class Control extends Component {
       <PassedComponent
         {...restOfProps}
         name={name}
-        onChange={this.handleChange.bind(this)}
-        onTouch={this.handleTouch.bind(this)}
-        value={getValueFromProps(this.props)}
-        validationState={this.selectProps(selectors.validationState()) || {}}
+        onChange={!submit ? this.handleChange.bind(this) : undefined}
+        onTouch={!submit ? this.handleTouch.bind(this) : undefined}
+        onSubmit={submit ? this.handleSubmit.bind(this) : undefined}
+        value={!submit ? getValueFromProps(this.props) : undefined}
+        validationState={
+          !submit
+            ? this.selectProps(selectors.validationState()) || {}
+            : undefined
+        }
       />
     );
   }

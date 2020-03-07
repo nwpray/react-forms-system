@@ -96,11 +96,14 @@ class Form extends Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    this.handleControlSubmit("native_submit");
+  }
 
+  handleControlSubmit(source) {
     const { onSubmit } = this.props;
 
     if (onSubmit) {
-      onSubmit(this.state);
+      onSubmit(this.state, source);
     }
   }
 
@@ -196,21 +199,30 @@ class Form extends Component {
   }
 
   render() {
+    const { component: Component } = this.props;
+
     const contextValue = {
       formState: this.state,
       bindControl: this.bindControl.bind(this),
       updateBindings: this.updateBindings.bind(this),
       onValueChange: this.handleValueChange.bind(this),
-      onTouched: this.handleTouched.bind(this)
+      onTouched: this.handleTouched.bind(this),
+      onSubmit: this.handleControlSubmit.bind(this)
     };
+
+    const component = Component ? (
+      <Component {...removeKeys(this.props, PROPS_TO_REMOVE)} />
+    ) : (
+      <form
+        method="post"
+        {...removeKeys(this.props, PROPS_TO_REMOVE)}
+        onSubmit={this.handleSubmit.bind(this)}
+      />
+    );
 
     return (
       <FormContext.Provider value={contextValue}>
-        <form
-          method="post"
-          {...removeKeys(this.props, PROPS_TO_REMOVE)}
-          onSubmit={this.handleSubmit.bind(this)}
-        />
+        {component}
       </FormContext.Provider>
     );
   }
