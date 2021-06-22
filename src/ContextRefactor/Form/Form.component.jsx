@@ -14,13 +14,15 @@ export const FormContext = React.createContext();
 
 const INIT_STATE = {
   values: {},
-  validationState: {}
+  validationState: {},
 };
 
 const PROPS_TO_REMOVE = ["onStateChange"];
 
-const defaultIsValidCheck = validationResults =>
-  !Object.keys(validationResults).some(key => validationResults[key] === false);
+const defaultIsValidCheck = (validationResults) =>
+  !Object.keys(validationResults).some(
+    (key) => validationResults[key] === false
+  );
 
 class Form extends Component {
   constructor(props) {
@@ -35,12 +37,13 @@ class Form extends Component {
 
     super.setState(updates, ...restOfArgs);
 
-    onStateChange &&
+    if (onStateChange) {
       onStateChange(
         isFunction(updates)
           ? updates(this.state)
           : { ...this.state, ...updates }
       );
+    }
   }
 
   bindControl(name, initValue, validators, peerDependencies, isValidCheck) {
@@ -52,12 +55,12 @@ class Form extends Component {
       ...this.bindings[name],
       validators,
       peerDependencies,
-      isValidCheck
+      isValidCheck,
     };
 
     const dependsOn = Object.keys(peerDependencies);
 
-    dependsOn.forEach(dependencyName => {
+    dependsOn.forEach((dependencyName) => {
       if (!this.bindings[dependencyName]) {
         this.bindings[dependencyName] = { dependantOf: [] };
       }
@@ -65,7 +68,7 @@ class Form extends Component {
       this.bindings = update(
         this.bindings,
         [dependencyName, "dependantOf"],
-        prevList => [...(prevList || []), name]
+        (prevList) => [...(prevList || []), name]
       );
     });
 
@@ -74,8 +77,8 @@ class Form extends Component {
       mutations.updateControlValidation(name, {
         dirty: false,
         touched: false,
-        valid: false
-      })
+        valid: false,
+      }),
     ]);
   }
 
@@ -88,7 +91,7 @@ class Form extends Component {
         ...(newName ? [mutations.changeControlName(oldName, newName)] : []),
         ...(typeof value !== "undefined"
           ? [mutations.updateValue(name, value)]
-          : [])
+          : []),
       ],
       () => this.triggerValidation(name)
     );
@@ -103,14 +106,16 @@ class Form extends Component {
     const { onSubmit } = this.props;
 
     if (onSubmit) {
-      onSubmit(this.state, source);
+      this.applyMutations([mutations.touchAll()], () =>
+        onSubmit(this.state, source)
+      );
     }
   }
 
   handleValueChange(name, value) {
     const [changed, dirty] = this.select([
       selectors.controlValueChanged(name, value),
-      selectors.controlDirty(name)
+      selectors.controlDirty(name),
     ]);
 
     if (changed || !dirty) {
@@ -119,10 +124,10 @@ class Form extends Component {
         ...(!dirty
           ? [
               mutations.updateControlValidation(name, {
-                dirty: true
-              })
+                dirty: true,
+              }),
             ]
-          : [])
+          : []),
       ]);
     }
   }
@@ -134,13 +139,13 @@ class Form extends Component {
     const controlsToUpdate = [name, ...(dependantOf || [])];
 
     this.applyMutations(
-      controlsToUpdate.map(controlName =>
+      controlsToUpdate.map((controlName) =>
         mutations.updateControlValidation(controlName, { pending: true })
       )
     );
 
     const validationResults = await Promise.all(
-      controlsToUpdate.map(controlName =>
+      controlsToUpdate.map((controlName) =>
         this.validateSingleControl(controlName, values[controlName])
       )
     );
@@ -149,7 +154,7 @@ class Form extends Component {
       validationResults.map((result, index) =>
         mutations.updateControlValidation(controlsToUpdate[index], {
           ...result,
-          pending: false
+          pending: false,
         })
       )
     );
@@ -166,7 +171,7 @@ class Form extends Component {
 
         return {
           ...prevValues,
-          [peerKey]: values[peerName]
+          [peerKey]: values[peerName],
         };
       },
       {}
@@ -175,7 +180,7 @@ class Form extends Component {
     const validatorKeys = Object.keys(validators);
 
     const results = await Promise.all(
-      validatorKeys.map(key => validators[key](value, peerValues))
+      validatorKeys.map((key) => validators[key](value, peerValues))
     );
 
     const remappedResults = results.reduce((prevMap, result, index) => {
@@ -185,7 +190,7 @@ class Form extends Component {
 
     return {
       ...remappedResults,
-      valid: (isValidCheck || defaultIsValidCheck)(remappedResults)
+      valid: (isValidCheck || defaultIsValidCheck)(remappedResults),
     };
   }
 
@@ -207,7 +212,7 @@ class Form extends Component {
       updateBindings: this.updateBindings.bind(this),
       onValueChange: this.handleValueChange.bind(this),
       onTouched: this.handleTouched.bind(this),
-      onSubmit: this.handleControlSubmit.bind(this)
+      onSubmit: this.handleControlSubmit.bind(this),
     };
 
     const component = Component ? (
@@ -230,12 +235,12 @@ class Form extends Component {
 
 Form.propTypes = {
   onSubmit: PropTypes.func,
-  onStateChange: PropTypes.func
+  onStateChange: PropTypes.func,
 };
 
 Form.defaultProps = {
   onSubmit: null,
-  onStateChange: null
+  onStateChange: null,
 };
 
 export default Form;

@@ -7,7 +7,7 @@ import { removeKeys } from "@/ObjectHelpers";
 
 import * as selectors from "./Control.selectors";
 
-const defaultIsValidationCheck = validationState =>
+const defaultIsValidationCheck = (validationState) =>
   Object.keys(validationState).reduce(
     (valid, validatorName) => (!validationState[validatorName] ? false : valid),
     true
@@ -26,14 +26,14 @@ const isValidatorsEqual = (validatorsA, validatorsB) => {
   }, true);
 };
 
-const getValueFromProps = props => {
+const getValueFromProps = (props) => {
   const { name, value, defaultValue, formState } = props;
   const {
-    values: { [name]: formValue }
+    values: { [name]: formValue },
   } = formState;
 
-  if (typeof formValue !== "undefined") return formValue;
   if (typeof value !== "undefined") return value;
+  if (typeof formValue !== "undefined") return formValue;
   if (typeof defaultValue !== "undefined") return defaultValue;
 
   return null;
@@ -45,7 +45,7 @@ const PROPS_TO_REMOVE = [
   "onTouched",
   "onValueChange",
   "updateBindings",
-  "bindControl"
+  "bindControl",
 ];
 
 class Control extends Component {
@@ -78,7 +78,7 @@ class Control extends Component {
       selectors.isValidCheck(),
       selectors.peerDependencies(),
       selectors.validators(),
-      selectors.value()
+      selectors.value(),
     ];
 
     const [
@@ -89,7 +89,7 @@ class Control extends Component {
       prevIsValidCheck,
       prevPeerDependencies,
       prevValidators,
-      prevValue
+      prevValue,
     ] = this.selectProps(compareSelectors);
 
     const [
@@ -100,7 +100,7 @@ class Control extends Component {
       nextIsValidCheck,
       nextPeerDependencies,
       nextValidators,
-      nextValue
+      nextValue,
     ] = this.selectProps(compareSelectors, nextProps);
 
     let shouldUpdate = false;
@@ -123,14 +123,14 @@ class Control extends Component {
     if (!isEqual(prevPeerDependencies, nextPeerDependencies)) {
       bindingUpdates = {
         ...bindingUpdates,
-        peerDependencies: nextPeerDependencies
+        peerDependencies: nextPeerDependencies,
       };
     }
 
     if (!isValidatorsEqual(prevValidators, nextValidators)) {
       bindingUpdates = {
         ...bindingUpdates,
-        validators: nextValidators
+        validators: nextValidators,
       };
     }
 
@@ -141,7 +141,7 @@ class Control extends Component {
     ) {
       bindingUpdates = {
         ...bindingUpdates,
-        value: nextValue
+        value: nextValue,
       };
     }
 
@@ -152,7 +152,7 @@ class Control extends Component {
     ) {
       bindingUpdates = {
         ...bindingUpdates,
-        value: nextFormValue
+        value: nextFormValue,
       };
     }
 
@@ -210,13 +210,13 @@ Control.propTypes = {
   component: PropTypes.oneOfType([
     PropTypes.element,
     PropTypes.func,
-    PropTypes.node
+    PropTypes.node,
   ]).isRequired,
   value: PropTypes.any,
   defaultValue: PropTypes.any,
   validators: PropTypes.object,
   peerDependencies: PropTypes.object,
-  isValidCheck: PropTypes.func
+  isValidCheck: PropTypes.func,
 };
 
 Control.defaultProps = {
@@ -224,7 +224,7 @@ Control.defaultProps = {
   defaultValue: undefined,
   validators: {},
   peerDependencies: {},
-  isValidCheck: defaultIsValidationCheck
+  isValidCheck: defaultIsValidationCheck,
 };
 
 export default Control;

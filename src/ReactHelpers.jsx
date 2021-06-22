@@ -1,14 +1,15 @@
-import React from 'react';
+import React from "react";
 
-const flattenDescendants = children =>
-    React.Children.toArray(children).reduce((flattenedChildren, child) => {
-        const { props } = child;
-        const { children: propsChildren } = props || {};
+const flattenDescendants = (children) =>
+  React.Children.toArray(children).reduce((flattenedChildren, child) => {
+    const { props } = child;
+    const { children: propsChildren } = props || {};
 
-        const childChildren = !props || !propsChildren ? [] : flattenDescendants(propsChildren);
+    const childChildren =
+      !props || !propsChildren ? [] : flattenDescendants(propsChildren);
 
-        return [...flattenedChildren, child, ...childChildren];
-    }, []);
+    return [...flattenedChildren, child, ...childChildren];
+  }, []);
 
 /**
  * TODO: Document
@@ -17,28 +18,27 @@ const flattenDescendants = children =>
  * @param {*} propsToMatch
  */
 const filterChildren = (children, filterCondition, recursive = false) =>
-    React.Children.toArray(children).reduce((filteredChildren, child) => {
-        console.log(child);
-        const { props } = child;
-        const { children: propsChildren } = props || {};
+  React.Children.toArray(children).reduce((filteredChildren, child) => {
+    const { props } = child;
+    const { children: propsChildren } = props || {};
 
-        let filteredChildrenUpdates = [];
+    let filteredChildrenUpdates = [];
 
-        if (props && propsChildren && recursive) {
-            filteredChildrenUpdates = [
-                ...filteredChildrenUpdates,
-                ...filterChildren(props.children, filterCondition, recursive)
-            ];
-        }
+    if (props && propsChildren && recursive) {
+      filteredChildrenUpdates = [
+        ...filteredChildrenUpdates,
+        ...filterChildren(props.children, filterCondition, recursive),
+      ];
+    }
 
-        if (filterCondition(child)) {
-            filteredChildrenUpdates = [...filteredChildrenUpdates, child];
-        }
+    if (filterCondition(child)) {
+      filteredChildrenUpdates = [...filteredChildrenUpdates, child];
+    }
 
-        return [...filteredChildren, ...filteredChildrenUpdates];
-    }, []);
+    return [...filteredChildren, ...filteredChildrenUpdates];
+  }, []);
 
 export default {
-    flattenDescendants,
-    filterChildren
+  flattenDescendants,
+  filterChildren,
 };

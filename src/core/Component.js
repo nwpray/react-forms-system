@@ -3,31 +3,33 @@ import { isArray } from "lodash";
 
 export default class Component extends React.Component {
   applyMutations(mutations, callback) {
-    if (isArray(mutations)) {
-      this.setState(
-        state =>
-          mutations.reduce((newState, mutation) => mutation(newState), state),
-        callback
-      );
-      return;
-    }
-
-    this.setState(mutations, callback);
+    this.setState(
+      (state) =>
+        (isArray(mutations) ? mutations : [mutations]).reduce(
+          (newState, mutation) => mutation(newState),
+          state
+        ),
+      callback
+    );
   }
 
   select(selectors, state = null) {
-    if (isArray(selectors)) {
-      return selectors.map(selector => selector(state || this.state));
-    }
+    const wasArray = isArray(selectors);
 
-    return selectors(state || this.state);
+    const results = (wasArray ? selectors : [selectors]).map((selector) =>
+      selector(state || this.state)
+    );
+
+    return wasArray ? results : results[0];
   }
 
   selectProps(selectors, props = null) {
-    if (isArray(selectors)) {
-      return selectors.map(selector => selector(props || this.props));
-    }
+    const wasArray = isArray(selectors);
 
-    return selectors(props || this.props);
+    const results = (wasArray ? selectors : [selectors]).map((selector) =>
+      selector(props || this.props)
+    );
+
+    return wasArray ? results : results[0];
   }
 }
