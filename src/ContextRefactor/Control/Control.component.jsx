@@ -137,7 +137,9 @@ class Control extends Component {
     // handle managed value changes
     if (
       typeof nextValue !== "undefined" &&
-      (!isEqual(prevValue, nextValue) || !isEqual(nextFormValue, nextValue))
+      (!isEqual(prevValue, nextValue) ||
+        (!isEqual(nextFormValue, nextValue) &&
+          isEqual(nextFormValue, prevFormValue)))
     ) {
       bindingUpdates = {
         ...bindingUpdates,

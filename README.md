@@ -103,7 +103,7 @@ import { View } from 'react-native';
 ##### Basic Form
 
 ```jsx
-<Form onSubmit={formState => console.log(formState)}>
+<Form onSubmit={(formState) => console.log(formState)}>
   // ... form content here
 </Form>
 ```
@@ -280,7 +280,7 @@ class ManagedForm extends React.Component {
 
   render() {
     return (
-      <Form onStateChange={formState => this.setState(formState.values)}>
+      <Form onStateChange={(formState) => this.setState(formState.values)}>
         <Form.Control
           name="firstName"
           component={NameInputComponent}
@@ -336,8 +336,8 @@ export default ({ value, onChange, onTouch }) => {
   return (
     <input
       value={value}
-      onChange={e => onChange(e.target.value)}
-      onClick={e => onTouch()}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={(e) => onTouch()}
     />
   );
 };
@@ -433,7 +433,7 @@ const UnmanagedForm = () => {
         defaultValue={""}
         validators={{ myselfOrPeer }}
         peerDependencies={{
-          location: "peer"
+          location: "peer",
         }}
       />
       <Form.Control
@@ -442,7 +442,7 @@ const UnmanagedForm = () => {
         defaultValue={""}
         validators={{ myselfOrPeer }}
         peerDependencies={{
-          provider: "peer"
+          provider: "peer",
         }}
       />
     </Form>
@@ -460,6 +460,7 @@ Here is a list of other react form projects that are similar in purpose to `reac
 ## Roadmap
 
 - Better error messages for poor use of api
+- debounce state updates
 - Test coverage
 - Optimize Depencencies
 - Hosted docs

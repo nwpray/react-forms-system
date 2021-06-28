@@ -30,20 +30,26 @@ class Form extends Component {
     this.state = INIT_STATE;
     this.uuid = uuid();
     this.bindings = {};
+    this.setStateQueue = [];
+    Form.idTicker = 0;
   }
 
-  setState(updates, ...restOfArgs) {
+  setState(updates, callback) {
     const { onStateChange } = this.props;
 
-    super.setState(updates, ...restOfArgs);
+    const id = Form.idTicker++;
 
-    if (onStateChange) {
-      onStateChange(
-        isFunction(updates)
-          ? updates(this.state)
-          : { ...this.state, ...updates }
-      );
-    }
+    this.setStateQueue.push(id);
+
+    super.setState(updates, () => {
+      this.setStateQueue = this.setStateQueue.filter((prevId) => prevId !== id);
+
+      if (this.setStateQueue.length < 1 && onStateChange) {
+        onStateChange(this.state);
+      }
+
+      callback && callback();
+    });
   }
 
   bindControl(name, initValue, validators, peerDependencies, isValidCheck) {
@@ -72,14 +78,17 @@ class Form extends Component {
       );
     });
 
-    this.applyMutations([
-      mutations.updateValue(name, initValue),
-      mutations.updateControlValidation(name, {
-        dirty: false,
-        touched: false,
-        valid: false,
-      }),
-    ]);
+    this.applyMutations(
+      [
+        mutations.updateValue(name, initValue),
+        mutations.updateControlValidation(name, {
+          dirty: false,
+          touched: false,
+          valid: false,
+        }),
+      ],
+      () => this.triggerValidation(name)
+    );
   }
 
   updateBindings(oldName, updates) {
