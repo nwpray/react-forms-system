@@ -1,7 +1,7 @@
 import React from "react";
 import Component from "@/core/Component";
 import PropTypes from "prop-types";
-import { isFunction, update } from "lodash";
+import update from "lodash/update";
 import uuid from "uuid/v4";
 
 import { removeKeys } from "@/ObjectHelpers";

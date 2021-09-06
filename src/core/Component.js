@@ -1,5 +1,5 @@
 import React from "react";
-import { isArray } from "lodash";
+import isArray from "lodash/isArray";
 
 export default class Component extends React.Component {
   applyMutations(mutations, callback) {

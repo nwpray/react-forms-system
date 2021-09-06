@@ -1,4 +1,4 @@
-import { update } from "lodash";
+import update from "lodash/update";
 
 export const updateValue = (name, value) => (state) => ({
   ...state,
